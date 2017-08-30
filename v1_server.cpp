@@ -54,25 +54,28 @@ int main(int argc, char* argv[]) {
         std::cout << "Accepted a connection on a socket" << std::endl;
 
         char bf[1024];
-        if (0 < recv(client, bf, sizeof(bf), 0)) {
+        ssize_t recvBytes = recv(client, bf, sizeof(bf), 0);
+        if (recvBytes == 0) {
+            std::cerr << "Disconnected from client" << std::endl;
+            close(client);
+        } else if (recvBytes == -1) {
+            std::cerr << "accept(2) failed. errno=" << errno << std::endl;
+            close(client);
+        } else if (strcmp(bf, "quit") == 0){
+            std::cout << "Received 'quit'" << std::endl;
+            close(client);
+            close(server);
+            return 0;
+        } else {
             std::cout << "Received a message from a socket" << std::endl;
 
-            char sendData[64];
-            snprintf(sendData, sizeof(sendData), bf);
-            ssize_t bytes = send(client, sendData, std::strlen(sendData) + 1, 0);
+            ssize_t bytes = write(client, bf, recvBytes);
             close(client);
 
             if (bytes == -1) {
                 std::cerr << "send(2) failed. errno=" << errno << std::endl;
-                continue;
-            }
-
-            std::cout << "Sent a message from a socket" << std::endl;
-
-            if (strcmp(bf, "quit") == 0) {
-                std::cout << "Received 'quit'" << std::endl;
-                close(server);
-                return 0;
+            } else {
+                std::cout << "Sent a message from a socket" << std::endl;
             }
         }
     }
