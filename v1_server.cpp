@@ -43,8 +43,8 @@ int main(int argc, char* argv[]) {
 
     while (true) {
         struct sockaddr_in clientAddr{0,};
-        socklen_t clientAddrsize = sizeof(clientAddr);
-        int client = accept(server, (struct sockaddr*)&clientAddr, &clientAddrsize);
+        socklen_t clientAddrSize = sizeof(clientAddr);
+        int client = accept(server, (struct sockaddr*)&clientAddr, &clientAddrSize);
 
         if (client <= 0) {
             std::cerr << "accept(2) failed. errno=" << errno << std::endl;
@@ -70,6 +70,7 @@ int main(int argc, char* argv[]) {
             std::cout << "Sent a message from a socket" << std::endl;
 
             if (strcmp(bf, "quit") == 0) {
+                std::cout << "Received 'quit'" << std::endl;
                 close(server);
                 return 0;
             }
