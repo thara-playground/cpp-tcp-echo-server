@@ -8,8 +8,11 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <pthread.h>
+#include <spawn.h>
 
 bool running = true;
+
+extern char **environ;
 
 void* connectHandler(void* param) {
     int client = *(int*)param;
@@ -48,7 +51,16 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    //daemon(1,1);
+    // Daemonize
+    if (fork() != 0) {
+        return 0;
+    }
+    setsid();
+    if (fork() != 0) {
+        return 0;
+    }
+    chdir("/");
+    
 
     int server = socket(AF_INET, SOCK_STREAM, 0);
     if (server < 0 ) {
